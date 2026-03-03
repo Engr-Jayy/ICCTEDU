@@ -1004,14 +1004,14 @@ async function save() {
                 "Content-Type": "application/json"
             },
         body: JSON.stringify({
-         room_name: target,
-          date: dt,            // use raw YYYY-MM-DD
-          time_slot: t,
-           professor: p,
-           department: d,
-            section: s,
-       reason: r || "-"
-         })
+  room: target,
+  professor: p,
+  department: d,
+  section: s,
+  time: t,
+  date: formattedDate,
+  reason: r || "-"
+})
         });
 
         if (!res.ok) throw new Error("Booking failed");
