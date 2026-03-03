@@ -127,3 +127,18 @@ exports.vpAction = async (req, res, next) => {
     next(err);
   }
 };
+// ================= PROFESSOR CANCEL =================
+exports.cancelBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const updated = await prisma.booking.update({
+      where: { id },
+      data: { status: "Cancelled" }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+};

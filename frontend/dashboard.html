@@ -941,13 +941,20 @@ function normalizeBooking(b) {
                 let opt = document.createElement('option');
                 opt.value = slot;
                 opt.innerText = slot;
-                const isBooked = logs.some(l => 
-                    l.room === target && 
-                    l.time === slot && 
-                    l.date === selectedDate && 
-                    !l.status.toLowerCase().includes("reject") &&
-                    !l.status.toLowerCase().includes("cancel")
-                );
+     const isBooked = logs.some(l => {
+    const logDate = new Date(l.date).toLocaleDateString();
+    
+    return (
+        l.room === target &&
+        l.time === slot &&
+        logDate === selectedDate &&
+        (
+            l.status === "Pending Admin" ||
+            l.status === "Pending VP" ||
+            l.status === "Approved"
+        )
+    );
+});
                 if (isBooked) {
                     opt.classList.add('booked-time');
                     opt.disabled = true;
@@ -1111,19 +1118,29 @@ async function save() {
             });
         }
 
-        function cancelBooking(id) {
-            if(!confirm("Are you sure you want to cancel this booking request?")) return;
-            let allLogs = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-            const idx = allLogs.findIndex(item => item.id === id);
-            if(idx !== -1) {
-                allLogs[idx].status = "Cancelled";
-                allLogs[idx].notification = "This reservation was cancelled by the professor.";
-                localStorage.setItem('ez_bookings', JSON.stringify(allLogs));
-                logs = allLogs;
-                renderLogs();
-                alert("Request successfully cancelled.");
+       
+            async function cancelBooking(id) {
+    if (!confirm("Are you sure you want to cancel this booking request?")) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/bookings/${id}/cancel`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
             }
-        }
+        });
+
+        if (!res.ok) throw new Error("Cancel failed");
+
+        alert("Request successfully cancelled.");
+
+        await loadLogsFromServer(); // 🔥 refresh from database
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to cancel booking.");
+    }
+}
 
         function handleDark() {
             const isDark = document.getElementById('darkModeToggle').checked;
