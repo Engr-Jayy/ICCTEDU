@@ -231,12 +231,21 @@
                     <small>${req.time_slot}</small>
                 </td>
                 <td>${new Date(req.date).toLocaleDateString()}</td>
-                <td>
-                    <button class="btn btn-approve"
-                        onclick="handleAdmin('${req.id}','approve')">
-                        Forward to VP
-                    </button>
-                </td>
+               <td>
+  <div style="display:flex; gap:10px;">
+
+    <button class="btn btn-reject"
+      onclick="handleAdmin('${req.id}','reject')">
+      Decline
+    </button>
+
+    <button class="btn btn-approve"
+      onclick="handleAdmin('${req.id}','approve')">
+      Forward to VP
+    </button>
+
+  </div>
+</td>
             </tr>
         `).join("");
 
