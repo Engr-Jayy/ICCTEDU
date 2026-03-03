@@ -963,56 +963,57 @@ async function loadLogsFromServer() {
         }
 
         function cls() { document.getElementById('mdl').style.display='none'; }
+async function save() {
+    let p = document.getElementById('inProf').value;
+    let d = document.getElementById('inDept').value;
+    let s = document.getElementById('inSect').value;
+    let dt = document.getElementById('inDate').value;
+    let r = document.getElementById('inReason').value;
+    let t = "";
 
-        function save() {
-            let p = document.getElementById('inProf').value;
-            let d = document.getElementById('inDept').value;
-            let s = document.getElementById('inSect').value;
-            let dt = document.getElementById('inDate').value;
-            let r = document.getElementById('inReason').value;
-            let t = "";
+    if (isEventFacility(target)) {
+        let st = document.getElementById('inStartTime').value;
+        let et = document.getElementById('inEndTime').value;
+        if (!st || !et) return alert("Please select both start and end times for the event!");
+        t = formatTime(st) + " - " + formatTime(et);
+    } else {
+        t = document.getElementById('inTime').value;
+    }
 
-            if(isEventFacility(target)) {
-                let st = document.getElementById('inStartTime').value;
-                let et = document.getElementById('inEndTime').value;
-                if(!st || !et) return alert("Please select both start and end times for the event!");
-                t = formatTime(st) + " - " + formatTime(et);
-            } else {
-                t = document.getElementById('inTime').value;
-            }
+    if (!p || !d || !s || !t || !dt) {
+        return alert("Complete all information!");
+    }
 
-            if(!p || !d || !s || !t || !dt) return alert("Complete all information!");
+    const formattedDate = new Date(dt).toLocaleDateString();
 
-            const formattedDate = new Date(dt).toLocaleDateString();
-            const conflict = logs.find(l => 
-                l.room === target && 
-                l.time === t && 
-                l.date === formattedDate && 
-                !l.status.toLowerCase().includes("reject") && 
-                !l.status.toLowerCase().includes("cancel")
-            );
-            
-            if(conflict) return alert("This exact time slot was just taken!");
-
-            const newBooking = {
-                id: "REQ-" + Date.now(),
+    try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
                 room: target,
-                prof: p,
-                dept: d,
-                sect: s,
+                professor: p,
+                department: d,
+                section: s,
                 time: t,
-                status: "Pending Admin",
                 date: formattedDate,
                 reason: r || "—"
-            };
+            })
+        });
 
-            logs.unshift(newBooking);
-            localStorage.setItem('ez_bookings', JSON.stringify(logs));
-            alert("Booking request submitted!");
-            cls();
-            location.reload(); 
-        }
+        if (!res.ok) throw new Error("Booking failed");
 
+        alert("Booking request submitted!");
+        cls();
+        location.reload();
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to submit booking.");
+    }
+}
         function renderLogs() {
             const tbody = document.getElementById('tblLogs');
             tbody.innerHTML = "";
@@ -1263,7 +1264,7 @@ async function loadLogsFromServer() {
             updateFloorDropdown(); 
             loadAnnouncements();
             loadLogsFromServer();
-            
+
             const findTimeSelect = document.getElementById('findTime');
             timeSlots.forEach(slot => {
                 let opt = document.createElement('option');
