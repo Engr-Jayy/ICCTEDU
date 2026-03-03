@@ -9,6 +9,8 @@ const bookingSchema = z.object({
   time_slot: z.string().min(1)
 });
 
+
+// ✅ GET AVAILABILITY (only VP-approved blocks slot)
 exports.getAvailability = async (req, res, next) => {
   try {
     const { room, date } = req.query;
@@ -17,7 +19,7 @@ exports.getAvailability = async (req, res, next) => {
       where: {
         room_name: room,
         date: new Date(date),
-        status: "booked"
+        status: "Approved"
       },
       select: { time_slot: true }
     });
@@ -27,6 +29,48 @@ exports.getAvailability = async (req, res, next) => {
     next(err);
   }
 };
+
+
+// ✅ CREATE BOOKING (FIRST STAGE → Pending Admin)
+exports.createBooking = async (req, res, next) => {
+  try {
+    const data = bookingSchema.parse(req.body);
+
+    // 🔒 prevent duplicates across ALL active states
+    const exists = await prisma.booking.findFirst({
+      where: {
+        room_name: data.room,
+        date: new Date(data.date),
+        time_slot: data.time_slot,
+        status: {
+          in: ["Pending Admin", "Pending VP", "Approved"]
+        }
+      }
+    });
+
+    if (exists) {
+      return res.status(409).json({
+        message: "Time slot already taken"
+      });
+    }
+
+    const booking = await prisma.booking.create({
+      data: {
+        room_name: data.room,
+        date: new Date(data.date),
+        time_slot: data.time_slot,
+        status: "Pending Admin" // ⭐ VERY IMPORTANT
+      }
+    });
+
+    res.status(201).json(booking);
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+// ✅ ADMIN ACTION (Admin → VP)
 exports.adminAction = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -37,7 +81,6 @@ exports.adminAction = async (req, res, next) => {
         where: { id },
         data: { status: "Pending VP" }
       });
-
       return res.json(updated);
     }
 
@@ -46,7 +89,6 @@ exports.adminAction = async (req, res, next) => {
         where: { id },
         data: { status: "Rejected by Admin" }
       });
-
       return res.json(updated);
     }
 
