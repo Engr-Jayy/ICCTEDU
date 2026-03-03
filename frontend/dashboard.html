@@ -983,24 +983,21 @@ async function save() {
     if (!p || !d || !s || !t || !dt) {
         return alert("Complete all information!");
     }
-
-    const formattedDate = new Date(dt).toLocaleDateString();
-
     try {
         const res = await fetch(`${API_BASE}/bookings`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                room: target,
-                professor: p,
-                department: d,
-                section: s,
-                time: t,
-                date: formattedDate,
-                reason: r || "—"
-            })
+        body: JSON.stringify({
+         room_name: target,
+          date: dt,            // use raw YYYY-MM-DD
+          time_slot: t,
+           professor: p,
+           department: d,
+            section: s,
+       reason: r || "-"
+         })
         });
 
         if (!res.ok) throw new Error("Booking failed");
