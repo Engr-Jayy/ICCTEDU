@@ -152,6 +152,7 @@ async function updateUI() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
         const raw = await res.json();
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // ✅ normalize response (VERY IMPORTANT)
         let data = [];
