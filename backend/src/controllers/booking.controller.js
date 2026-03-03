@@ -5,10 +5,13 @@ const prisma = new PrismaClient();
 
 const bookingSchema = z.object({
   room: z.string().min(1),
+  professor: z.string().optional(),
+  department: z.string().optional(),
+  section: z.string().optional(),
+  reason: z.string().optional(),
   date: z.string().min(1),
   time_slot: z.string().min(1)
 });
-
 
 // ✅ GET AVAILABILITY (only VP-approved blocks slot)
 exports.getAvailability = async (req, res, next) => {
@@ -55,12 +58,16 @@ exports.createBooking = async (req, res, next) => {
     }
 
     const booking = await prisma.booking.create({
-      data: {
-        room_name: data.room,
-        date: new Date(data.date),
-        time_slot: data.time_slot,
-        status: "Pending Admin" // ⭐ VERY IMPORTANT
-      }
+  data: {
+  room_name: data.room,
+  professor: data.professor || null,
+  department: data.department || null,
+  section: data.section || null,
+  reason: data.reason || null,
+  date: new Date(data.date),
+  time_slot: data.time_slot,
+  status: "Pending Admin"
+}
     });
 
     res.status(201).json(booking);
