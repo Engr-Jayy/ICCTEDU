@@ -725,13 +725,27 @@ async function loadLogsFromServer() {
 
     // IMPORTANT: adjust depending on your backend response
     if (Array.isArray(data)) {
-      logs = data;
-    } else if (data.bookings) {
-      logs = data.bookings;
-    } else {
-      logs = [];
-    }
+  logs = data.map(normalizeBooking);
+} else if (data.bookings) {
+  logs = data.bookings.map(normalizeBooking);
+} else {
+  logs = [];
+}
 
+function normalizeBooking(b) {
+  return {
+    id: b.id,
+    room: b.room || b.room_name,
+    prof: b.prof || b.professor,
+    dept: b.dept || b.department,
+    sect: b.sect || b.section,
+    time: b.time || b.time_slot,
+    date: b.date,
+    status: b.status || "Pending Admin",
+    reason: b.reason,
+    notification: b.notification
+  };
+}
     renderLogs(); // your existing render function
   } catch (err) {
     console.error("Failed to load logs:", err);
