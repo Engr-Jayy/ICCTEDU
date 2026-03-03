@@ -169,7 +169,7 @@
 </div>
 
 <script>
-    // Navigation Control
+    const API_BASE = "https://icctedu.onrender.com/api";
     function showPage(pageId) {
         document.getElementById("dashboardPage").style.display = pageId === "dashboardPage" ? "block" : "none";
         document.getElementById("logsPage").style.display = pageId === "logsPage" ? "block" : "none";
@@ -184,20 +184,29 @@
     }
 
     // Core UI Update Logic
-    function updateAdminUI() {
-        const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-        
-        // Update Stats
-        document.getElementById('countPendingAdmin').innerText = data.filter(i => i.status === "Pending Admin").length;
-        document.getElementById('countPendingVP').innerText = data.filter(i => i.status === "Pending VP").length;
-        document.getElementById('countApproved').innerText = data.filter(i => i.status === "Approved").length;
+    async function updateAdminUI() {
+    try {
+        const res = await fetch(`${API_BASE}/dashboard/stats`);
+        const data = await res.json();
 
-        // Render Pending Table
+        // 🔹 counts
+        document.getElementById('countPendingAdmin').innerText =
+            data.filter(i => i.status === "Pending Admin").length;
+
+        document.getElementById('countPendingVP').innerText =
+            data.filter(i => i.status === "Pending VP").length;
+
+        document.getElementById('countApproved').innerText =
+            data.filter(i => i.status === "Approved").length;
+
         const tableBody = document.getElementById('adminTableBody');
         const adminRequests = data.filter(i => i.status === "Pending Admin");
 
-        if(adminRequests.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8; font-size: 0.9rem;">No pending requests from professors at this time.</td></tr>`;
+        if (adminRequests.length === 0) {
+            tableBody.innerHTML =
+                `<tr><td colspan="4" style="text-align:center;padding:40px;color:#94a3b8;">
+                No pending requests from professors at this time.
+                </td></tr>`;
             return;
         }
 
@@ -205,45 +214,48 @@
             <tr>
                 <td>
                     <div class="user-info">
-                        <div class="avatar">${req.prof[0]}</div>
-                        <div><strong style="display:block; margin-bottom:2px;">${req.prof}</strong><small style="color:#64748b">${req.dept}</small></div>
+                        <div class="avatar">${req.professor?.[0] || "?"}</div>
+                        <div>
+                            <strong>${req.professor || "-"}</strong>
+                            <small style="color:#64748b">${req.department || "-"}</small>
+                        </div>
                     </div>
                 </td>
-                <td><b style="color:#2563eb">${req.room}</b><br><small style="color:#64748b">${req.time}</small></td>
-                <td><span style="color:#64748b; font-size:0.9rem">${req.date}</span></td>
                 <td>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn btn-approve" onclick="handleAdmin('${req.id}', 'approve')"><i class="fas fa-check"></i> Forward to VP</button>
-                        
-                        <button class="btn btn-reject" onclick="handleAdmin('${req.id}', 'reject')"><i class="fas fa-times"></i></button>
-                    </div>
+                    <b style="color:#2563eb">${req.room_name}</b><br>
+                    <small>${req.time_slot}</small>
+                </td>
+                <td>${new Date(req.date).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-approve"
+                        onclick="handleAdmin('${req.id}','approve')">
+                        Forward to VP
+                    </button>
                 </td>
             </tr>
-        `).join('');
+        `).join("");
+
+    } catch (err) {
+        console.error("Admin load failed:", err);
     }
+}
 
-    function handleAdmin(id, action) {
-        let data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-        const idx = data.findIndex(i => i.id === id);
-        
-        if (idx === -1) return;
+async function handleAdmin(id, action) {
+    try {
+        await fetch(`${API_BASE}/bookings/${id}/admin`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action })
+        });
 
-        if(action === 'approve') {
-            data[idx].status = "Pending VP";
-            data[idx].adminNote = "Verified by Admin. Ready for VP approval.";
-            alert("Request successfully escalated to the Vice President.");
-        } else {
-            let reason = prompt("Enter rejection reason for the Professor:");
-            if (reason === null) return; 
-            
-            data[idx].status = "Rejected by Admin";
-            data[idx].notification = reason || "Schedule conflict or invalid requirements.";
-            alert("Request has been rejected.");
-        }
-        
-        localStorage.setItem('ez_bookings', JSON.stringify(data));
+        alert("Sent to VP.");
         updateAdminUI();
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to update.");
     }
+}
 
     function loadLogs() {
         const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];

@@ -130,6 +130,7 @@
 </div>
 
 <script>
+    const API_BASE = "https://icctedu.onrender.com/api";
     function switchPage(page) {
         document.getElementById('dashboardPage').style.display = page === 'dashboard' ? 'block' : 'none';
         document.getElementById('logsPage').style.display = page === 'logs' ? 'block' : 'none';
@@ -140,41 +141,61 @@
         if(page === 'logs') loadLogs();
     }
 
-    function updateUI() {
-        const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-        
-        // Update Stats
-        document.getElementById('statPending').innerText = data.filter(i => i.status === "Pending VP").length;
-        document.getElementById('statApproved').innerText = data.filter(i => i.status === "Approved").length;
-        document.getElementById('statRejected').innerText = data.filter(i => (i.status || "").includes("Rejected")).length;
+   async function updateUI() {
+    try {
+        const res = await fetch(`${API_BASE}/dashboard/stats`);
+        const data = await res.json();
 
-        // Render Pending
+        document.getElementById('statPending').innerText =
+            data.filter(i => i.status === "Pending VP").length;
+
+        document.getElementById('statApproved').innerText =
+            data.filter(i => i.status === "Approved").length;
+
+        document.getElementById('statRejected').innerText =
+            data.filter(i => (i.status || "").includes("Rejected")).length;
+
         const vpList = document.getElementById('vpList');
         const pendingVP = data.filter(i => i.status === "Pending VP");
 
-        if(pendingVP.length === 0) {
-            vpList.innerHTML = `<div class="empty-state"><i class="fas fa-clipboard-check fa-3x" style="margin-bottom:15px; opacity:0.2;"></i><p>No requests awaiting your signature.</p></div>`;
+        if (pendingVP.length === 0) {
+            vpList.innerHTML =
+                `<div class="empty-state">
+                    <p>No requests awaiting your signature.</p>
+                 </div>`;
             return;
         }
 
         vpList.innerHTML = pendingVP.map(req => `
             <div class="request-card">
                 <div>
-                    <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">${req.room}</div>
-                    <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">
-                        <i class="fas fa-user-circle"></i> Prof. ${req.prof} | <i class="fas fa-clock"></i> ${req.date} (${req.time})
+                    <div style="font-weight:800;color:var(--primary);">
+                        ${req.room_name}
                     </div>
-                    <div style="margin-top:8px; font-size:0.75rem; color:var(--primary); background:var(--primary-light); padding:4px 8px; border-radius:5px; display:inline-block;">
-                        <i class="fas fa-check-double"></i> Admin Note: ${req.adminNote || 'Verified'}
+                    <div style="font-size:0.85rem;color:var(--text-muted);">
+                        Prof. ${req.professor || "-"} |
+                        ${req.time_slot}
                     </div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-reject" onclick="handleAction('${req.id}', 'reject')"><i class="fas fa-times"></i> Decline</button>
-                    <button class="btn btn-authorize" onclick="handleAction('${req.id}', 'approve')"><i class="fas fa-signature"></i> Authorize</button>
+
+                <div style="display:flex;gap:10px;">
+                    <button class="btn btn-reject"
+                        onclick="handleAction('${req.id}','reject')">
+                        Decline
+                    </button>
+
+                    <button class="btn btn-authorize"
+                        onclick="handleAction('${req.id}','approve')">
+                        Authorize
+                    </button>
                 </div>
             </div>
-        `).join('');
+        `).join("");
+
+    } catch (err) {
+        console.error("VP load failed:", err);
     }
+}
 
     function handleAction(id, action) {
         let data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
