@@ -978,43 +978,53 @@ function normalizeBooking(b) {
 
         function cls() { document.getElementById('mdl').style.display='none'; }
 async function save() {
-    let p = document.getElementById('inProf').value;
-    let d = document.getElementById('inDept').value;
-    let s = document.getElementById('inSect').value;
-    let dt = document.getElementById('inDate').value;
-    let r = document.getElementById('inReason').value;
-    let t = "";
-
-    if (isEventFacility(target)) {
-        let st = document.getElementById('inStartTime').value;
-        let et = document.getElementById('inEndTime').value;
-        if (!st || !et) return alert("Please select both start and end times for the event!");
-        t = formatTime(st) + " - " + formatTime(et);
-    } else {
-        t = document.getElementById('inTime').value;
-    }
-
-    if (!p || !d || !s || !t || !dt) {
-        return alert("Complete all information!");
-    }
     try {
+        // 🔹 collect values
+        let p = document.getElementById('inProf').value;
+        let d = document.getElementById('inDept').value;
+        let s = document.getElementById('inSect').value;
+        let dt = document.getElementById('inDate').value;
+        let r = document.getElementById('inReason').value;
+        let t = "";
+
+        if (isEventFacility(target)) {
+            let st = document.getElementById('inStartTime').value;
+            let et = document.getElementById('inEndTime').value;
+            if (!st || !et) return alert("Please select both start and end times for the event!");
+            t = formatTime(st) + " - " + formatTime(et);
+        } else {
+            t = document.getElementById('inTime').value;
+        }
+
+        if (!p || !d || !s || !t || !dt) {
+            return alert("Complete all information!");
+        }
+
+        // ✅ FIX: define formattedDate properly
+        const formattedDate = new Date(dt).toISOString().split("T")[0];
+
+        // 🚀 SEND TO BACKEND
         const res = await fetch(`${API_BASE}/bookings`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-        body: JSON.stringify({
-  room: target,
-  professor: p,
-  department: d,
-  section: s,
-  time: t,
-  date: formattedDate,
-  reason: r || "-"
-})
+            body: JSON.stringify({
+                room: target,
+                professor: p,
+                department: d,
+                section: s,
+                time: t,
+                date: formattedDate,
+                reason: r || "-"
+            })
         });
 
-        if (!res.ok) throw new Error("Booking failed");
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error("Server error:", errText);
+            throw new Error("Booking failed");
+        }
 
         alert("Booking request submitted!");
         cls();
