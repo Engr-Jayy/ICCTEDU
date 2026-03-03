@@ -1177,16 +1177,22 @@ async function save() {
 
                 b.data.forEach(f => {
                     if(searchF !== 'All' && f.floor !== searchF) return;
+let availableRooms = f.rooms.filter(r => {
+    return !logs.some(l => {
+        const logDate = new Date(l.date).toLocaleDateString();
 
-                    let availableRooms = f.rooms.filter(r => {
-                        return !logs.some(l => 
-                            l.room === r.id && 
-                            l.time === searchTime && 
-                            l.date === searchDate && 
-                            !l.status.toLowerCase().includes("reject") &&
-                            !l.status.toLowerCase().includes("cancel")
-                        );
-                    });
+        return (
+            l.room === r.id &&
+            l.time === searchTime &&
+            logDate === searchDate &&
+            (
+                l.status === "Pending Admin" ||
+                l.status === "Pending VP" ||
+                l.status === "Approved"
+            )
+        );
+    });
+});
 
                     if(availableRooms.length > 0) {
                         foundAny = true;
