@@ -184,35 +184,40 @@
     }
 
     // Core UI Update Logic
-    async function updateAdminUI() {
+  async function updateAdminUI() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
-        const raw = await res.json();
-        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // ✅ NORMALIZE RESPONSE (VERY IMPORTANT)
-        let data = [];
-        if (Array.isArray(raw)) data = raw;
-        else if (raw.bookings) data = raw.bookings;
+        if (!res.ok) {
+            console.error("Stats fetch failed:", res.status);
+            return;
+        }
+
+        const data = await res.json();
+
+        // 🟢 make sure it's always an array
+        const list = Array.isArray(data) ? data : [];
 
         // 🔹 counts
         document.getElementById('countPendingAdmin').innerText =
-            data.filter(i => i.status === "Pending Admin").length;
+            list.filter(i => i.status === "Pending Admin").length;
 
         document.getElementById('countPendingVP').innerText =
-            data.filter(i => i.status === "Pending VP").length;
+            list.filter(i => i.status === "Pending VP").length;
 
         document.getElementById('countApproved').innerText =
-            data.filter(i => i.status === "Approved").length;
+            list.filter(i => i.status === "Approved").length;
 
         const tableBody = document.getElementById('adminTableBody');
-        const adminRequests = data.filter(i => i.status === "Pending Admin");
+        const adminRequests = list.filter(i => i.status === "Pending Admin");
 
         if (adminRequests.length === 0) {
-            tableBody.innerHTML =
-                `<tr><td colspan="4" style="text-align:center;padding:40px;color:#94a3b8;">
-                No pending requests from professors at this time.
-                </td></tr>`;
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align:center;padding:40px;color:#94a3b8;">
+                        No pending requests from professors at this time.
+                    </td>
+                </tr>`;
             return;
         }
 
@@ -232,21 +237,19 @@
                     <small>${req.time_slot}</small>
                 </td>
                 <td>${new Date(req.date).toLocaleDateString()}</td>
-               <td>
-  <div style="display:flex; gap:10px;">
+                <td>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-approve"
+                            onclick="handleAdmin('${req.id}','approve')">
+                            Forward to VP
+                        </button>
 
-    <button class="btn btn-reject"
-      onclick="handleAdmin('${req.id}','reject')">
-      Decline
-    </button>
-
-    <button class="btn btn-approve"
-      onclick="handleAdmin('${req.id}','approve')">
-      Forward to VP
-    </button>
-
-  </div>
-</td>
+                        <button class="btn btn-reject"
+                            onclick="handleAdmin('${req.id}','reject')">
+                            Decline
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join("");
 
