@@ -27,37 +27,31 @@ exports.getAvailability = async (req, res, next) => {
     next(err);
   }
 };
-exports.createBooking = async (req, res, next) => {
+exports.adminAction = async (req, res, next) => {
   try {
-    const data = bookingSchema.parse(req.body);
+    const { id } = req.params;
+    const { action } = req.body;
 
-    // ❗ only block if already fully approved
-    const exists = await prisma.booking.findFirst({
-      where: {
-        room_name: data.room,
-        date: new Date(data.date),
-        time_slot: data.time_slot,
-        status: "Approved"
-      }
-    });
-
-    if (exists) {
-      return res.status(409).json({
-        message: "Time slot already booked"
+    if (action === "approve") {
+      const updated = await prisma.booking.update({
+        where: { id },
+        data: { status: "Pending VP" }
       });
+
+      return res.json(updated);
     }
 
-    // ✅ START WORKFLOW HERE
-    const booking = await prisma.booking.create({
-      data: {
-        room_name: data.room,
-        date: new Date(data.date),
-        time_slot: data.time_slot,
-        status: "Pending Admin" // ⭐ IMPORTANT
-      }
-    });
+    if (action === "reject") {
+      const updated = await prisma.booking.update({
+        where: { id },
+        data: { status: "Rejected by Admin" }
+      });
 
-    res.status(201).json(booking);
+      return res.json(updated);
+    }
+
+    res.status(400).json({ message: "Invalid action" });
+
   } catch (err) {
     next(err);
   }
