@@ -723,31 +723,33 @@ async function loadLogsFromServer() {
     const res = await fetch(`${API_BASE}/dashboard/stats`);
     const data = await res.json();
 
-    // IMPORTANT: adjust depending on your backend response
-    if (Array.isArray(data)) {
-  logs = data.map(normalizeBooking);
-} else if (data.bookings) {
-  logs = data.bookings.map(normalizeBooking);
-} else {
-  logs = [];
-}
+    function normalizeBooking(b) {
+      return {
+        id: b.id,
+        room: b.room || b.room_name,
+        prof: b.prof || b.professor,
+        dept: b.dept || b.department,
+        sect: b.sect || b.section,
+        time: b.time || b.time_slot,
+        date: b.date,
+        status: b.status || "Pending Admin",
+        reason: b.reason,
+        notification: b.notification
+      };
+    }
 
-function normalizeBooking(b) {
-  return {
-    id: b.id,
-    room: b.room || b.room_name,
-    prof: b.prof || b.professor,
-    dept: b.dept || b.department,
-    sect: b.sect || b.section,
-    time: b.time || b.time_slot,
-    date: b.date,
-    status: b.status || "Pending Admin",
-    reason: b.reason,
-    notification: b.notification
-  };
-}
-}
-    renderLogs(); // your existing render function
+    if (Array.isArray(data)) {
+      logs = data.map(normalizeBooking);
+    } else if (data.bookings) {
+      logs = data.bookings.map(normalizeBooking);
+    } else {
+      logs = [];
+    }
+
+    renderLogs();
+    // 🔥 refresh booking UI after logs arrive
+if (target) updateTimeSlots();
+
   } catch (err) {
     console.error("Failed to load logs:", err);
   }
@@ -1296,7 +1298,7 @@ let availableRooms = f.rooms.filter(r => {
         }
 
         // --- Core Boot Initialization ---
-        window.onload = () => {
+      window.onload = async () =>  {
             if(localStorage.getItem('ez_theme') === 'theme-dark') {
                 document.getElementById('darkModeToggle').checked = true;
                 document.body.classList.add('dark-mode');
@@ -1308,7 +1310,7 @@ let availableRooms = f.rooms.filter(r => {
             initBuildingsDropdown();
             updateFloorDropdown(); 
             loadAnnouncements();
-            loadLogsFromServer();
+           await loadLogsFromServer();
 
             const findTimeSelect = document.getElementById('findTime');
             timeSlots.forEach(slot => {
