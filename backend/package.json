@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/server.js",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "build": "prisma generate",
-    "postinstall": "prisma generate",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy"
-  },
+"scripts": {
+  "dev": "nodemon src/server.js",
+  "start": "node src/server.js",
+  "postinstall": "node ./node_modules/prisma/build/index.js generate",
+  "prisma:generate": "node ./node_modules/prisma/build/index.js generate",
+  "prisma:migrate": "node ./node_modules/prisma/build/index.js migrate deploy"
+},
   "dependencies": {
     "@prisma/client": "^5.19.0",
     "cors": "^2.8.5",
