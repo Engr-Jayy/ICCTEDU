@@ -130,22 +130,35 @@
 </div>
 
 <script>
-    const API_BASE = "https://icctedu.onrender.com/api";
-    function switchPage(page) {
-        document.getElementById('dashboardPage').style.display = page === 'dashboard' ? 'block' : 'none';
-        document.getElementById('logsPage').style.display = page === 'logs' ? 'block' : 'none';
-        
-        document.getElementById('nav-dash').classList.toggle('active', page === 'dashboard');
-        document.getElementById('nav-logs').classList.toggle('active', page === 'logs');
+const API_BASE = "https://icctedu.onrender.com/api";
 
-        if(page === 'logs') loadLogs();
-    }
+// ================= PAGE SWITCH =================
+function switchPage(page) {
+    document.getElementById('dashboardPage').style.display =
+        page === 'dashboard' ? 'block' : 'none';
+    document.getElementById('logsPage').style.display =
+        page === 'logs' ? 'block' : 'none';
 
-   async function updateUI() {
+    document.getElementById('nav-dash')
+        .classList.toggle('active', page === 'dashboard');
+    document.getElementById('nav-logs')
+        .classList.toggle('active', page === 'logs');
+
+    if (page === 'logs') loadLogs();
+}
+
+// ================= LOAD VP DATA =================
+async function updateUI() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
-        const data = await res.json();
+        const raw = await res.json();
 
+        // ✅ normalize response (VERY IMPORTANT)
+        let data = [];
+        if (Array.isArray(raw)) data = raw;
+        else if (raw.bookings) data = raw.bookings;
+
+        // ===== stats =====
         document.getElementById('statPending').innerText =
             data.filter(i => i.status === "Pending VP").length;
 
@@ -155,6 +168,7 @@
         document.getElementById('statRejected').innerText =
             data.filter(i => (i.status || "").includes("Rejected")).length;
 
+        // ===== pending list =====
         const vpList = document.getElementById('vpList');
         const pendingVP = data.filter(i => i.status === "Pending VP");
 
@@ -197,49 +211,88 @@
     }
 }
 
-    function handleAction(id, action) {
-        let data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-        const idx = data.findIndex(i => i.id === id);
-        if (idx === -1) return;
+// ================= VP ACTION (CRITICAL FIX) =================
+async function handleAction(id, action) {
+    try {
+        const res = await fetch(`${API_BASE}/bookings/${id}/vp`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action })
+        });
 
-        if(action === 'approve') {
-            data[idx].status = "Approved";
-            data[idx].vpApprovedAt = new Date().toLocaleString();
-            alert("Booking Authorized.");
-        } else {
-            let reason = prompt("Reason for denial:");
-            if (reason === null) return;
-            data[idx].status = "Rejected by VP";
-            data[idx].notification = reason || "Declined by Executive Office.";
-            alert("Booking Denied.");
-        }
-        
-        localStorage.setItem('ez_bookings', JSON.stringify(data));
-        updateUI();
+        if (!res.ok) throw new Error("VP action failed");
+
+        alert(
+            action === "approve"
+                ? "Booking Authorized."
+                : "Booking Denied."
+        );
+
+        updateUI(); // refresh list
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to process request.");
     }
+}
 
-    function loadLogs() {
-        const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
-        const logs = data.filter(i => ["Approved", "Rejected by Admin", "Rejected by VP"].includes(i.status));
+// ================= HISTORY LOGS =================
+async function loadLogs() {
+    try {
+        const res = await fetch(`${API_BASE}/dashboard/stats`);
+        const raw = await res.json();
+
+        let data = [];
+        if (Array.isArray(raw)) data = raw;
+        else if (raw.bookings) data = raw.bookings;
+
+        const logs = data.filter(i =>
+            ["Approved", "Rejected by Admin", "Rejected by VP"]
+                .includes(i.status)
+        );
+
         const body = document.getElementById("logsTableBody");
 
         if (logs.length === 0) {
-            body.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;">No history available.</td></tr>`;
+            body.innerHTML =
+                `<tr><td colspan="4" style="text-align:center;padding:30px;">
+                    No history available.
+                 </td></tr>`;
             return;
         }
 
         body.innerHTML = logs.map(req => `
             <tr>
-                <td><strong>${req.prof}</strong><br><small>${req.dept}</small></td>
-                <td><b>${req.room}</b><br><small>${req.date} | ${req.time}</small></td>
-                <td><span class="status-pill ${req.status === 'Approved' ? 'status-approved' : 'status-rejected'}">${req.status}</span></td>
-                <td>${req.vpApprovedAt || req.date}</td>
+                <td>
+                    <strong>${req.professor || "-"}</strong>
+                </td>
+                <td>
+                    <b>${req.room_name}</b><br>
+                    <small>${req.time_slot}</small>
+                </td>
+                <td>
+                    <span class="status-pill ${
+                        req.status === 'Approved'
+                            ? 'status-approved'
+                            : 'status-rejected'
+                    }">
+                        ${req.status}
+                    </span>
+                </td>
+                <td>
+                    ${new Date(req.created_at).toLocaleString()}
+                </td>
             </tr>
-        `).join('');
-    }
+        `).join("");
 
-    setInterval(updateUI, 5000);
-    window.onload = updateUI;
+    } catch (err) {
+        console.error("Logs load failed:", err);
+    }
+}
+
+// ================= AUTO REFRESH =================
+setInterval(updateUI, 5000);
+window.onload = updateUI;
 </script>
 </body>
 </html>
