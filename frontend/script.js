@@ -111,11 +111,11 @@ async function bookRoom(room, slot) {
   const res = await fetch(`${API_BASE}/bookings`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      room,
-      date: today,
-      time_slot: slot
-    })
+ body: JSON.stringify({
+  room_name: room,
+  date: today,
+  time_slot: slot
+})
   });
 
   if (!res.ok) {
