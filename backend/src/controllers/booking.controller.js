@@ -98,3 +98,32 @@ exports.adminAction = async (req, res, next) => {
     next(err);
   }
 };
+
+// ✅ VP FINAL APPROVAL
+exports.vpAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (action === "approve") {
+      const updated = await prisma.booking.update({
+        where: { id },
+        data: { status: "Approved" }
+      });
+      return res.json(updated);
+    }
+
+    if (action === "reject") {
+      const updated = await prisma.booking.update({
+        where: { id },
+        data: { status: "Rejected by VP" }
+      });
+      return res.json(updated);
+    }
+
+    res.status(400).json({ message: "Invalid action" });
+
+  } catch (err) {
+    next(err);
+  }
+};
