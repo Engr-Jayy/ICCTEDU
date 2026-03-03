@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduZone | Login Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        .main-container {
+            display: flex;
+            width: 900px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .features-side {
+            flex: 1;
+            background: #2563eb;
+            color: white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-box {
+            font-size: 2.7rem;
+            font-weight: 800;
+            color: #ffe100fc;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-left: 72px;
+        }
+
+        .desc-text {
+            font-style: italic;
+            color: #eaeaea;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 3px;
+        }
+
+        .boss-text {
+            font-style: italic;
+            color: #eaeaea;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 27px;
+        }
+
+        .chat-text {
+            font-style: italic;
+            color: #eaeaea;
+            font-weight: bold;
+            margin-top: -18px;
+            margin-bottom: 37px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .fas.fa-check-circle {
+            color: #07ec4cfc;
+        }
+
+        .form-side {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            background: #f0fdfa;
+        }
+
+        .form-content {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-content h2 {
+            font-size: 2rem;
+            color: #0b0c0e;
+            margin-bottom: 30px;
+            text-align: center;
+            font-family: arial;
+        }
+
+        .input-wrapper {
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .input-wrapper select,
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #000000;
+            border-radius: 10px;
+            outline: none;
+            font-size: 0.95rem;
+            background-color: rgb(255, 255, 255);
+            color: #05080c;
+            font-weight: 500;
+        }
+
+        .input-wrapper select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .input-wrapper select:focus,
+        .input-wrapper input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Hidden state for CD Key Box */
+        #keyArea {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #1d4ed8;
+        }
+
+        .portal-footer {
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .logo-container {
+            position: relative;
+           margin-top: 1px;
+           margin-bottom: 230px;
+      }
+.logo {
+    position: absolute;
+    top: -11px;
+    left: 80px;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    height: 68px;
+    width: 68px;
+}
+
+    </style>
+</head>
+
+<body>
+  <div class="logo-container">
+  <img src="assets/logo.png" alt="Logo" class="logo">
+</div>
+    <div class="main-container">
+        <div class="features-side">
+            <div class="logo-box"><i class=""></i> EduZone</div>
+            <p class="desc-text">A room scheduling made simple for you</p>
+            <p class="boss-text">Your smart solution for managings</p>
+            <p class="chat-text">educational spaces</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Real-time room availability</li>
+                <li><i class="fas fa-check-circle"></i> Simplified booking management</li>
+                <li><i class="fas fa-check-circle"></i> Smart conflict prevention</li>
+            </ul>
+        </div>
+
+        <div class="form-side">
+            <div class="form-content">
+                <h2>WELCOME!</h2>
+
+                <div class="input-wrapper">
+                    <select id="userRole">
+                        <option value="" disabled selected>Select Your Role</option>
+                        <option value="prof">PROFESSOR</option>
+                        <option value="admin">SCHOOL ADMIN</option>
+                        <option value="vp">VICE PRESIDENT</option>
+                    </select>
+                    <i class="fas fa-chevron-down"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;"></i>
+                </div>
+
+                <div class="input-wrapper" id="keyArea">
+                    <input type="text" id="cdKey" placeholder="Enter CD Key" autocomplete="off">
+                    <i class="fas fa-key"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;"></i>
+                </div>
+
+                <button class="btn-login" id="loginBtn">Continue</button>
+            </div>
+
+            <div class="portal-footer">Powered by <strong>EduZone</strong> &copy; 2026. All rights reserved.</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginBtn = document.getElementById("loginBtn");
+            const roleSelect = document.getElementById("userRole");
+            const keyArea = document.getElementById("keyArea");
+            const keyInput = document.getElementById("cdKey");
+
+            const validKeys = {
+                'prof': 'PROF_ICCT@20252026!!',
+                'admin': 'ADMIN_ICCT@20252026!!',
+                'vp': 'VP_ICCT@20252026!!'
+            };
+
+            let isKeyVisible = false;
+
+            loginBtn.addEventListener("click", function () {
+                const selectedRole = roleSelect.value;
+
+                if (!selectedRole) {
+                    alert("Please select your role first.");
+                    return;
+                }
+
+                if (!isKeyVisible) {
+                    keyArea.style.display = "block";
+                    setTimeout(() => {
+                        keyArea.style.opacity = "1";
+                        keyArea.style.transform = "translateY(0)";
+                    }, 10);
+
+                    this.innerText = "Login";
+                    isKeyVisible = true;
+                    return;
+                }
+
+                const enteredKey = keyInput.value.trim();
+                if (enteredKey === "") {
+                    alert("Please enter the CD Key to proceed.");
+                    return;
+                }
+
+                if (enteredKey === validKeys[selectedRole]) {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+                    this.style.pointerEvents = 'none';
+                    this.style.opacity = '0.8';
+
+                    setTimeout(() => {
+                        const paths = {
+                            'admin': 'admindashboard.html',
+                            'vp': 'vpdashboard.html',
+                            'prof': 'dashboard.html'
+                        };
+                        window.location.href = paths[selectedRole];
+                    }, 500);
+                } else {
+                    alert("Invalid CD Key for the selected role.");
+                    keyInput.value = "";
+                }
+            });
+
+            roleSelect.addEventListener("change", () => {
+                isKeyVisible = false;
+                keyArea.style.display = "none";
+                keyArea.style.opacity = "0";
+                keyArea.style.transform = "translateY(-10px)";
+                loginBtn.innerText = "Continue";
+                keyInput.value = "";
+            });
+        });
+    </script>
+
+   <a href="administrator.html" id="adminLink" style="position:fixed; top:15px; right:20px; font-size:12px; padding:6px 10px; background:#2563eb; color:white; border-radius:6px; text-decoration:none; opacity:0.85; z-index: 1001; font-family: sans-serif;">
+    Continue as Administrator
+</a>
+
+<div id="keyBox" style="display:none; position:fixed; top:55px; right:20px; background:white; padding:15px; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #ddd; z-index: 1001; width: 200px;">
+    <p style="margin: 0 0 10px 0; font-size: 13px; font-family: sans-serif; color: #333;">Enter Admin Key:</p>
+    <div style="display: flex; gap: 5px;">
+        <input type="password" id="keyInput" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; outline: none;">
+        <button id="submitKey" style="padding: 5px 10px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">Go</button>
+    </div>
+</div>
+
+<script>
+    const adminLink = document.getElementById('adminLink');
+    const keyBox = document.getElementById('keyBox');
+    const keyInput = document.getElementById('keyInput');
+    const submitKey = document.getElementById('submitKey');
+    let hideTimer;
+
+    function hideBox() {
+        keyBox.style.display = 'none';
+        keyInput.value = ""; 
+    }
+    function startTimer() {
+        clearTimeout(hideTimer); 
+        hideTimer = setTimeout(hideBox, 5000); 
+    }
+    adminLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (keyBox.style.display === 'none' || keyBox.style.display === '') {
+            keyBox.style.display = 'block';
+            keyInput.focus();
+            startTimer();
+        } else {
+            hideBox();
+        }
+    });
+    keyInput.addEventListener('input', startTimer);
+    document.addEventListener('mousedown', function(e) {
+        if (!keyBox.contains(e.target) && e.target !== adminLink) {
+            hideBox();
+        }
+    });
+    function validateKey() {
+        if (keyInput.value === "ADMIN_EDUZONE@20252026!!") {
+            window.location.href = adminLink.href;
+        } else {
+            alert("Invalid Key. Access Denied.");
+            keyInput.value = "";
+            startTimer(); 
+        }
+    }
+    submitKey.addEventListener('click', validateKey);
+    keyInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') validateKey(); });
+</script>
+</body>
+
+</html>

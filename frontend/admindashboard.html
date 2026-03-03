@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // 1. Check agad pagka-load ng page: Kung naka-ON ang maintenance, itapon agad sa maintenance.html
+        if (localStorage.getItem('ez_maintenance_mode') === 'true') {
+            window.location.replace('maintenance.html');
+        }
+
+        // 2. Real-time detector: Kung naka-open ang dashboard at biglang pinindot ng Admin ang switch, mag-o-offline agad ito.
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'ez_maintenance_mode' && e.newValue === 'true') {
+                window.location.replace('maintenance.html');
+            }
+        });
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduZone | Admin Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #2563eb; 
+            --primary-light: #eff6ff;
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b; 
+            --bg: #f8fafc; 
+            --sidebar: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); display: flex; min-height: 100vh; color: var(--text-main); }
+        
+        /* Sidebar Styling */
+        .sidebar { width: 280px; background: var(--sidebar); color: white; padding: 30px 20px; position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
+        .sidebar h2 { color: #fce539fc; font-size: 1.5rem; margin-bottom: 40px; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.5px; }
+        .sidebar h2 i { font-size: 1.8rem; }
+        
+        .nav-item { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-radius: 12px; transition: all 0.2s ease; margin-bottom: 8px; color: #94a3b8; text-decoration: none; font-weight: 500; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+
+        /* Main Content */
+        .main { flex: 1; margin-left: 280px; padding: 40px; transition: 0.3s; }
+        
+        .header-section { margin-bottom: 30px; }
+        .header-section h1 { font-size: 1.8rem; font-weight: 700; color: #0f172a; }
+        .header-section p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 10px 15px -5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.7); }
+        .stat-card .label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 2.2rem; font-weight: 800; color: var(--text-main); }
+
+        /* Tables */
+        .table-container { background: white; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eef2f6; }
+        .table-header { padding: 25px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .table-header h3 { font-size: 1.1rem; font-weight: 700; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 18px 25px; text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        td { padding: 20px 25px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #fcfdfe; }
+        
+        /* Elements */
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 42px; height: 42px; background: var(--primary-light); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; border: 1px solid #dbeafe; }
+        
+        .status-pill { padding: 6px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; }
+        .status-pending { background: #fffbeb; color: #92400e; }
+        .status-approved { background: #ecfdf5; color: #065f46; }
+        .status-rejected { background: #fef2f2; color: #991b1b; }
+
+        /* Buttons */
+        .btn { border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-approve { background: var(--primary); color: white; }
+        .btn-approve:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-reject { background: #f1f5f9; color: var(--danger); }
+        .btn-reject:hover { background: #fee2e2; transform: translateY(-1px); }
+        
+        .btn-back { background: #f1f5f9; color: var(--text-main); }
+        .btn-back:hover { background: #e2e8f0; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2><i class="fas fa-shield-check"></i> EduZone</h2>
+    <div class="nav-item active" onclick="showPage('dashboardPage')"><i class="fas fa-grid-2"></i> Dashboard</div>
+    <div class="nav-item" onclick="showPage('logsPage')"><i class="fas fa-clock-rotate-left"></i> Logs History</div>
+    <a href="index.html" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255, 228, 53, 0.1); padding-top: 20px;"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+</div>
+
+<div id="dashboardPage" class="main">
+    <div class="header-section">
+        <h1>Administrative Dashboard</h1>
+        <p>Review and manage facility reservation requests.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="label">Awaiting Review</span>
+            <div class="value" id="countPendingAdmin">0</div>
+        </div>
+        <div class="stat-card">
+            <span class="label">Escalated to VP</span>
+            <div class="value" id="countPendingVP">0</div>
+        </div>
+        <div class="stat-card">
+            <span class="label">Confirmed Bookings</span>
+            <div class="value" id="countApproved">0</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Pending Approval Queue</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Professor / Department</th>
+                    <th>Facility & Schedule</th>
+                    <th>Submission Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="logsPage" class="main" style="display:none;">
+    <div class="header-section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Booking History</h1>
+                <p>Archived records of all approved, rejected, and cancelled requests.</p>
+            </div>
+            <button class="btn btn-back" onclick="showPage('dashboardPage')"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Professor</th>
+                    <th>Facility & Schedule</th>
+                    <th>Final Status</th>
+                    <th>Remarks / Notes</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Navigation Control
+    function showPage(pageId) {
+        document.getElementById("dashboardPage").style.display = pageId === "dashboardPage" ? "block" : "none";
+        document.getElementById("logsPage").style.display = pageId === "logsPage" ? "block" : "none";
+        
+        // Update Sidebar UI
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach(item => item.classList.remove("active"));
+        if(pageId === "dashboardPage") navItems[0].classList.add("active");
+        if(pageId === "logsPage") navItems[1].classList.add("active");
+
+        if(pageId === 'logsPage') loadLogs();
+    }
+
+    // Core UI Update Logic
+    function updateAdminUI() {
+        const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
+        
+        // Update Stats
+        document.getElementById('countPendingAdmin').innerText = data.filter(i => i.status === "Pending Admin").length;
+        document.getElementById('countPendingVP').innerText = data.filter(i => i.status === "Pending VP").length;
+        document.getElementById('countApproved').innerText = data.filter(i => i.status === "Approved").length;
+
+        // Render Pending Table
+        const tableBody = document.getElementById('adminTableBody');
+        const adminRequests = data.filter(i => i.status === "Pending Admin");
+
+        if(adminRequests.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8; font-size: 0.9rem;">No pending requests from professors at this time.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = adminRequests.map(req => `
+            <tr>
+                <td>
+                    <div class="user-info">
+                        <div class="avatar">${req.prof[0]}</div>
+                        <div><strong style="display:block; margin-bottom:2px;">${req.prof}</strong><small style="color:#64748b">${req.dept}</small></div>
+                    </div>
+                </td>
+                <td><b style="color:#2563eb">${req.room}</b><br><small style="color:#64748b">${req.time}</small></td>
+                <td><span style="color:#64748b; font-size:0.9rem">${req.date}</span></td>
+                <td>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-approve" onclick="handleAdmin('${req.id}', 'approve')"><i class="fas fa-check"></i> Forward to VP</button>
+                        
+                        <button class="btn btn-reject" onclick="handleAdmin('${req.id}', 'reject')"><i class="fas fa-times"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function handleAdmin(id, action) {
+        let data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
+        const idx = data.findIndex(i => i.id === id);
+        
+        if (idx === -1) return;
+
+        if(action === 'approve') {
+            data[idx].status = "Pending VP";
+            data[idx].adminNote = "Verified by Admin. Ready for VP approval.";
+            alert("Request successfully escalated to the Vice President.");
+        } else {
+            let reason = prompt("Enter rejection reason for the Professor:");
+            if (reason === null) return; 
+            
+            data[idx].status = "Rejected by Admin";
+            data[idx].notification = reason || "Schedule conflict or invalid requirements.";
+            alert("Request has been rejected.");
+        }
+        
+        localStorage.setItem('ez_bookings', JSON.stringify(data));
+        updateAdminUI();
+    }
+
+    function loadLogs() {
+        const data = JSON.parse(localStorage.getItem('ez_bookings')) || [];
+        // Included 'Cancelled' status in the logs history view
+        const logs = data.filter(i => 
+            i.status === "Approved" || 
+            i.status === "Rejected by Admin" || 
+            i.status === "Rejected by VP" ||
+            i.status === "Cancelled"
+        );
+
+        const body = document.getElementById("logsTableBody");
+
+        if (logs.length === 0) {
+            body.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8;">No historical records found.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = logs.map(req => {
+            let statusClass = req.status === "Approved" ? "status-approved" : "status-rejected";
+            return `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="avatar">${req.prof ? req.prof[0] : "?"}</div>
+                            <div><strong>${req.prof || "-"}</strong><br><small style="color:#64748b">${req.dept || "-"}</small></div>
+                        </div>
+                    </td>
+                    <td><b style="color:#2563eb">${req.room || "-"}</b><br><small style="color:#64748b">${req.time || "-"}</small></td>
+                    <td><span class="status-pill ${statusClass}">${req.status || "-"}</span></td>
+                    <td style="font-size: 0.85rem; color:#64748b; max-width: 250px;">${req.notification || req.adminNote || "N/A"}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Auto-refresh every 5 seconds
+    setInterval(() => {
+        if(document.getElementById('dashboardPage').style.display !== 'none') {
+            updateAdminUI();
+        }
+    }, 5000);
+
+    window.onload = updateAdminUI;
+</script>
+</body>
+</html>

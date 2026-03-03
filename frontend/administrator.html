@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduZone | Admin Executive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-main: #f8fafc;
+            --sidebar: #0f172a;
+            --white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar); padding: 1.5rem; display: flex; flex-direction: column; color: white; position: fixed; height: 100vh; z-index: 100; overflow-y: auto; }
+        .brand { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 10px; }
+        .brand i { color: #fbbf24; }
+        
+        .nav-group { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 1.5rem 0 0.5rem 0.5rem; letter-spacing: 0.5px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #94a3b8; text-decoration: none; border-radius: var(--radius); margin-bottom: 4px; transition: all 0.2s ease; cursor: pointer; border: none; background: transparent; width: 100%; font-size: 0.9rem; font-weight: 600; text-align: left; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.08); color: white; }
+        .nav-link.active { border-left: 3px solid #fbbf24; border-radius: 0 var(--radius) var(--radius) 0; background: linear-gradient(90deg, rgba(251,191,36,0.1) 0%, rgba(255,255,255,0) 100%); }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; flex: 1; padding: 2.5rem 3rem; }
+        .section { display: none; max-width: 1100px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        header { margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.8rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+
+        /* Professional Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stat-box { 
+            background: var(--white); padding: 1.5rem; border-radius: var(--radius); 
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 1.25rem;
+            box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+        }
+        .stat-box:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+        
+        .stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+        .icon-warning { background: #fef3c7; color: #d97706; }
+        .icon-success { background: #dcfce7; color: #15803d; }
+        .icon-primary { background: #e0e7ff; color: #4338ca; }
+        
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-val { font-size: 1.85rem; font-weight: 800; color: var(--text-main); line-height: 1.2; margin-top: 2px; }
+        .stat-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Cards & Forms */
+        .card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; overflow: hidden; }
+        .card-header { padding: 1.5rem; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .form-body { padding: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        
+        label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.05em; }
+        input, select, textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s; background: #fbfcfe; color: var(--text-main); }
+        textarea { resize: none; min-height: 140px; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); background: white; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: #f1f5f9; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 5px; border-bottom: 1px solid var(--border); padding: 0 1.5rem; background: #f8fafc; }
+        .tab-btn { padding: 15px 20px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; font-size: 0.9rem; margin-bottom: -1px; }
+        .tab-btn:hover { color: var(--text-main); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; padding: 0; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* Tables */
+        .table-container { overflow-x: auto; width: 100%; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th { background: var(--white); padding: 1rem 1.5rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .data-table td { padding: 1rem 1.5rem; font-size: 0.9rem; border-bottom: 1px solid #f1f5f9; color: var(--text-main); vertical-align: middle; }
+        .data-table tr:hover td { background: #f8fafc; }
+        .status-pill { padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--sidebar); color: white; padding: 16px 24px; border-radius: 10px; display: none; z-index: 1100; border-left: 4px solid var(--success); box-shadow: var(--shadow-lg); font-weight: 600; }
+        
+        /* Live Clock Container */
+        .live-clock {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--white);
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Maintenance Toggle Switch */
+        .switch-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding: 0 0.5rem; }
+        .switch-label { font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--success); transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: var(--shadow-sm); }
+        input:checked + .slider { background-color: var(--danger); }
+        input:checked + .slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand"><i class="fas fa-shield-halved"></i> <span>EduZone Admin</span></div>
+        <nav style="flex: 1;">
+            <div class="nav-group">Overview</div>
+            <button class="nav-link active" onclick="showSection('overview', this); updateMetrics();"><i class="fas fa-grid-2"></i> Dashboard</button>
+            <button class="nav-link" onclick="showSection('broadcast', this)"><i class="fas fa-bullhorn"></i> Announcements</button>
+            
+            <div class="nav-group">📅 Booking Management</div>
+            <button class="nav-link" onclick="showSection('bookings', this); loadBookings();"><i class="fas fa-calendar-check"></i> Reservations</button>
+            <button class="nav-link" onclick="showSection('logs', this); loadLogs();"><i class="fas fa-list-check"></i> Activity Logs</button>
+
+            <div class="nav-group">⚙️ System</div>
+            <button class="nav-link" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> System Settings</button>
+        </nav>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-top: 1rem;">
+            <div class="switch-container">
+                <span class="switch-label"><i class="fas fa-hammer"></i> Maintenance</span>
+                <label class="switch">
+                    <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <button class="nav-link" onclick="logout()" style="color: #fca5a5; font-weight: 700;"><i class="fas fa-power-off"></i> Sign Out</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div id="overview" class="section active">
+            <header>
+                <h1>Dashboard Overview</h1>
+                <div class="live-clock">
+                    <i class="fas fa-clock" style="color: var(--primary);"></i>
+                    <span id="datetimeDisplay">Loading time...</span>
+                </div>
+            </header>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon icon-warning"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Pending Requests</div>
+                        <div class="stat-val" id="statPending">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon icon-success"><i class="fas fa-check-double"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Total Approved</div>
+                        <div class="stat-val" id="statApproved">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon icon-primary"><i class="fas fa-broadcast-tower"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Active Broadcasts</div>
+                        <div class="stat-val" id="statAnnouncements">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 3rem 2rem; text-align: center; border: 1px dashed #cbd5e1; background: #f8fafc; box-shadow: none;">
+                <i class="fas fa-chart-line" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">System Running Smoothly</h3>
+            </div>
+        </div>
+
+        <div id="bookings" class="section">
+            <header><h1>Reservation Management</h1></header>
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab-btn active" onclick="switchTab('bookings', 'pending')">Pending Requests</div>
+                    <div class="tab-btn" onclick="switchTab('bookings', 'approved')">Approved Bookings</div>
+                    <div class="tab-btn" onclick="switchTab('bookings', 'rejected')">Rejected/Cancelled</div>
+                </div>
+                
+                <div id="tab-pending" class="tab-content active table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Req ID</th><th>Details</th><th>Schedule</th><th>Room</th><th>Status</th></tr></thead>
+                        <tbody id="tblPending"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-approved" class="tab-content table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Req ID</th><th>Details</th><th>Schedule</th><th>Room</th><th>Status</th></tr></thead>
+                        <tbody id="tblApproved"></tbody>
+                    </table>
+                </div>
+
+                <div id="tab-rejected" class="tab-content table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Req ID</th><th>Details</th><th>Schedule</th><th>Room</th><th>Status</th></tr></thead>
+                        <tbody id="tblRejected"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="broadcast" class="section">
+            <header><h1>Broadcast Center</h1></header>
+            <div class="card">
+                <div class="card-header">
+                    <span><i class="fas fa-pen-to-square" style="color: var(--primary); margin-right: 8px;"></i> Compose New Announcement</span>
+                </div>
+                <div class="form-body">
+                    <div class="form-group">
+                        <label>Headline Subject</label>
+                        <input type="text" id="annTitle" placeholder="Enter headline title">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Priority Category</label>
+                            <select id="annCategory">
+                                <option value="General">General Info</option>
+                                <option value="Event">Campus Event</option>
+                                <option value="System">System Alert</option>
+                                <option value="Maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Publication Date</label>
+                            <input type="datetime-local" id="annDateTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Detailed Message</label>
+                        <textarea id="annMsg" placeholder="Write your full professional message here..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="postAnnouncement()"><i class="fas fa-paper-plane"></i> Publish Now</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="logs" class="section">
+            <header><h1>System Activity Logs</h1></header>
+            <div class="card table-container">
+                <table class="data-table">
+                    <thead><tr><th>Timestamp</th><th>Status</th><th>Reference Room</th><th>Requester</th></tr></thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="settings" class="section">
+            <header><h1>System Configurations</h1></header>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="card form-body">
+                    <h3 style="margin-bottom: 15px; font-size: 1.1rem;"><i class="fas fa-database" style="color: var(--primary);"></i> Data Backup</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Export all system data (bookings and announcements) to a secure JSON file.</p>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="backupData()"><i class="fas fa-download"></i> Download Backup</button>
+                </div>
+
+                <div class="card form-body">
+                    <h3 style="margin-bottom: 15px; font-size: 1.1rem;"><i class="fas fa-upload" style="color: var(--success);"></i> Data Restore</h3>
+                    <input type="file" id="restoreFile" accept=".json" style="margin-bottom: 10px;">
+                    <button class="btn btn-outline" style="width: 100%;" onclick="restoreData()"><i class="fas fa-sync"></i> Restore Data</button>
+                </div>
+
+                <div class="card form-body" style="border: 1px solid #fca5a5; background: #fef2f2;">
+                    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--danger);"><i class="fas fa-triangle-exclamation"></i> Danger Zone</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Wipe all system data and revert to factory defaults. This cannot be undone.</p>
+                    <button class="btn btn-danger" style="width: 100%;" onclick="masterReset()"><i class="fas fa-trash-alt"></i> Factory Reset</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast">Action successful</div>
+
+    <script>
+        // --- Live Clock Script ---
+        function updateLiveTime() {
+            const now = new Date();
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('datetimeDisplay').innerText = now.toLocaleDateString('en-US', options);
+        }
+
+        // --- Navigation & UI ---
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) btn.classList.add('active');
+        }
+
+        function switchTab(section, tabId) {
+            const container = document.getElementById(section);
+            container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            t.style.animation = 'fadeIn 0.3s ease';
+            setTimeout(() => {
+                t.style.display = 'none';
+            }, 3000);
+        }
+
+        // --- Dashboard Metrics ---
+        function updateMetrics() {
+            const bookings = JSON.parse(localStorage.getItem('ez_bookings') || '[]');
+            const ann = JSON.parse(localStorage.getItem('globalAnnouncements') || '[]');
+
+            document.getElementById('statPending').innerText = bookings.filter(b => b.status.includes('Pending')).length;
+            document.getElementById('statApproved').innerText = bookings.filter(b => b.status === 'Approved').length;
+            document.getElementById('statAnnouncements').innerText = ann.length;
+        }
+
+        // --- Booking Management ---
+        function loadBookings() {
+            const bookings = JSON.parse(localStorage.getItem('ez_bookings') || '[]');
+            
+            const renderTable = (filterFn, tbodyId, showActions = false) => {
+                const filtered = bookings.filter(filterFn);
+                const tbody = document.getElementById(tbodyId);
+                
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color:#94a3b8;">No records found matching this status.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = filtered.map(b => `
+                    <tr>
+                        <td><strong style="color: var(--text-main);">${b.id}</strong></td>
+                        <td>
+                            <div style="font-weight:700;">${b.prof}</div>
+                            <div style="font-size:0.75rem; color:#64748b;">${b.dept} - ${b.sect}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">${b.date}</div>
+                            <div style="font-size:0.8rem; font-weight:700; color:var(--primary);">${b.time}</div>
+                        </td>
+                        <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">${b.room}</span></td>
+                        <td>
+                            ${showActions ? `
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn btn-success" style="padding: 8px 12px;" onclick="processBooking('${b.id}', 'Approved')"><i class="fas fa-check"></i></button>
+                                    <button class="btn btn-danger" style="padding: 8px 12px;" onclick="processBooking('${b.id}', 'Rejected')"><i class="fas fa-times"></i></button>
+                                </div>
+                            ` : `
+                                <span class="status-pill" style="background:${b.status === 'Approved' ? '#dcfce7': (b.status.includes('Pending') ? '#fef3c7' : '#fee2e2')}; color:${b.status === 'Approved' ? '#166534': (b.status.includes('Pending') ? '#92400e' : '#991b1b')}">${b.status}</span>
+                            `}
+                        </td>
+                    </tr>
+                `).join('');
+            };
+
+            renderTable(b => b.status.includes('Pending'), 'tblPending', false);
+            renderTable(b => b.status === 'Approved', 'tblApproved', false);
+            renderTable(b => b.status.includes('Reject') || b.status.includes('Cancel'), 'tblRejected', false);
+        }
+
+        function processBooking(id, newStatus) {
+            let bookings = JSON.parse(localStorage.getItem('ez_bookings') || '[]');
+            let index = bookings.findIndex(b => b.id === id);
+            
+            if (index > -1) {
+                bookings[index].status = newStatus;
+                let reason = "";
+                if (newStatus === 'Rejected') {
+                    reason = prompt("Provide a reason for rejection (this will be seen by the professor):");
+                    if (reason === null) return;
+                }
+                
+                bookings[index].notification = reason ? `Admin Note: ${reason}` : `Request ${newStatus} by Administrator.`;
+                localStorage.setItem('ez_bookings', JSON.stringify(bookings));
+                
+                showToast(`Booking ${newStatus}!`);
+                loadBookings();
+                updateMetrics();
+            }
+        }
+
+        // --- Announcements ---
+        function postAnnouncement() {
+            const title = document.getElementById('annTitle').value;
+            const msg = document.getElementById('annMsg').value;
+            const type = document.getElementById('annCategory').value;
+            const date = document.getElementById('annDateTime').value;
+
+            if(!title || !msg || !date) return alert("Fill all fields.");
+
+            const entry = { id: Date.now(), title, message: msg, type: type, date: new Date(date).toLocaleString() };
+            const list = JSON.parse(localStorage.getItem('globalAnnouncements') || '[]');
+            list.unshift(entry);
+            localStorage.setItem('globalAnnouncements', JSON.stringify(list));
+
+            showToast("Announcement Broadcasted successfully!");
+            ['annTitle', 'annMsg', 'annDateTime'].forEach(id => document.getElementById(id).value = '');
+            updateMetrics();
+        }
+
+        // --- Activity Logs ---
+        function loadLogs() {
+            const bookings = JSON.parse(localStorage.getItem('ez_bookings') || '[]');
+            const tbody = document.getElementById('logTableBody');
+            
+            if(bookings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem; color: #94a3b8;">No activity logs found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = bookings.map(b => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; font-size: 0.85rem;">${b.date}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${b.time}</div>
+                    </td>
+                    <td><span class="status-pill" style="background:#f1f5f9; color:#475569;">${b.status}</span></td>
+                    <td><strong>${b.room}</strong></td>
+                    <td>${b.prof}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- System Data Settings ---
+        function backupData() {
+            const data = JSON.stringify(localStorage);
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `EduZone_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Backup downloaded successfully.");
+        }
+
+        function restoreData() {
+            const fileInput = document.getElementById('restoreFile');
+            const file = fileInput.files[0];
+            if(!file) return alert("Please select a JSON backup file first.");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    localStorage.clear();
+                    for(let key in data) { localStorage.setItem(key, data[key]); }
+                    alert("Data restore successful! Reloading system.");
+                    location.reload();
+                } catch(err) { alert("Invalid backup file format."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function masterReset() {
+            if(confirm("CRITICAL WARNING: This will permanently wipe all bookings and announcements. Type 'YES' to confirm.")) {
+                let check = prompt("Type 'YES' to permanently format system:");
+                if(check === 'YES') {
+                    localStorage.clear(); 
+                    alert("System Reset Complete.");
+                    location.reload(); 
+                }
+            }
+        }
+
+        function logout() { window.location.replace('index.html'); }
+
+        // --- Maintenance Mode (ADMIN STAYS OPEN, DASHBOARDS CLOSE) ---
+        function toggleMaintenance() {
+            const toggle = document.getElementById('maintenanceToggle');
+            
+            if(toggle.checked) {
+                if(confirm("Are you sure? This will put dashboard.html, admindashboard.html, and vpdashboard.html offline and show the maintenance page to users.")) {
+                    localStorage.setItem('ez_maintenance_mode', 'true');
+                    showToast("Maintenance ON. All assigned dashboards are now offline.");
+                    toggle.nextElementSibling.style.backgroundColor = "var(--danger)";
+                } else {
+                    toggle.checked = false; // Revert if cancelled
+                }
+            } else {
+                localStorage.setItem('ez_maintenance_mode', 'false');
+                showToast("System Live. All dashboards are back online.");
+                toggle.nextElementSibling.style.backgroundColor = "var(--success)";
+            }
+        }
+
+        function checkMaintenanceState() {
+            const isMaintenance = localStorage.getItem('ez_maintenance_mode') === 'true';
+            document.getElementById('maintenanceToggle').checked = isMaintenance;
+            if(isMaintenance) {
+                document.querySelector('.slider').style.backgroundColor = 'var(--danger)';
+            } else {
+                document.querySelector('.slider').style.backgroundColor = 'var(--success)';
+            }
+        }
+
+        window.onload = () => { 
+            updateMetrics(); 
+            updateLiveTime(); 
+            checkMaintenanceState(); // Check toggle state upon loading Admin page
+            setInterval(updateLiveTime, 1000); 
+        };
+    </script>
+</body>
+</html>
