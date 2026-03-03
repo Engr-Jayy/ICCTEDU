@@ -1001,7 +1001,7 @@ async function save() {
         }
 
         // ✅ FIX: define formattedDate properly
-        const formattedDate = new Date(dt).toISOString().split("T")[0];
+    const formattedDate = new Date(dt).toISOString().split("T")[0];
 
         // 🚀 SEND TO BACKEND
         const res = await fetch(`${API_BASE}/bookings`, {
@@ -1009,15 +1009,15 @@ async function save() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                room: target,
-                professor: p,
-                department: d,
-                section: s,
-                time: t,
-                date: formattedDate,
-                reason: r || "-"
-            })
+           body: JSON.stringify({
+  room: target,
+  professor: p,
+  department: d,
+  section: s,
+  time_slot: t,     // ✅ MUST MATCH BACKEND
+  date: formattedDate,
+  reason: r || "-"
+})
         });
 
         if (!res.ok) {
