@@ -253,16 +253,23 @@
         console.error("Admin load failed:", err);
     }
 }
-
 async function handleAdmin(id, action) {
     try {
-        await fetch(`${API_BASE}/bookings/${id}/admin`, {
+        const res = await fetch(`${API_BASE}/bookings/${id}/admin`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action })
         });
 
-        alert("Sent to VP.");
+        if (!res.ok) throw new Error("Request failed");
+
+        // ✅ CORRECT FEEDBACK
+        if (action === "approve") {
+            alert("Request forwarded to VP.");
+        } else if (action === "reject") {
+            alert("Request rejected by Admin.");
+        }
+
         updateAdminUI();
 
     } catch (err) {
