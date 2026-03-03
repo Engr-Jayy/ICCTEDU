@@ -3,15 +3,13 @@ const prisma = new PrismaClient();
 
 exports.getStats = async (_, res, next) => {
   try {
-    const totalBookings = await prisma.booking.count({
-      where: { status: "booked" }
+    const bookings = await prisma.booking.findMany({
+      where: { status: "booked" },
+      orderBy: { created_at: "desc" }
     });
 
-    const totalRooms = await prisma.room.count();
-
     res.json({
-      totalBookings,
-      totalRooms
+      bookings
     });
   } catch (err) {
     next(err);
