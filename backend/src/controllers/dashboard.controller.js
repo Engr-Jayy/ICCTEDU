@@ -3,10 +3,9 @@ const prisma = new PrismaClient();
 
 exports.getStats = async (_, res, next) => {
   try {
-    const bookings = await prisma.booking.findMany({
-      where: { status: "booked" },
-      orderBy: { created_at: "desc" }
-    });
+const bookings = await prisma.booking.findMany({
+  orderBy: { created_at: "desc" }
+});
 
     res.json({
       bookings
