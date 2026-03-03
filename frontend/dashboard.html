@@ -746,6 +746,7 @@ function normalizeBooking(b) {
     notification: b.notification
   };
 }
+}
     renderLogs(); // your existing render function
   } catch (err) {
     console.error("Failed to load logs:", err);
@@ -1073,8 +1074,8 @@ async function save() {
                 tr.innerHTML = `
                     <td style="border-left: 4px solid var(--primary);"><b>${l.room}</b></td>
                     <td><div style="font-weight:600;">${l.prof}</div><small style="opacity:0.6;">${l.dept}</small></td>
-                    <td>${l.time}</td>
-                    <td>${l.date}</td>
+                    <td>${l.time || "-"}</td>
+                    <td>${new Date(l.date).toLocaleDateString()}</td>
                     <td>
                         <span class="status-pill ${sClass}">
                             <i class="fas ${icon}"></i> ${l.status}
@@ -1096,7 +1097,7 @@ async function save() {
                                 <div class="detail-item"><label>Request ID</label><span>${l.id}</span></div>
                                 <div class="detail-item"><label>Professor</label><span>${l.prof}</span></div>
                                 <div class="detail-item"><label>Dept / Section</label><span>${l.dept} - ${l.sect}</span></div>
-                                <div class="detail-item"><label>Room / Date</label><span>${l.room} (${l.date})</span></div>
+                                <div class="detail-item"><label>Room / Date</label><span>${l.room} (${new Date(l.date).toLocaleDateString()})</span></div>
                             </div>
                             <label style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 800; display:block; margin-bottom:5px;">Reason / Notifications:</label>
                             <div style="background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); font-size:0.85rem; margin-bottom:15px; color:var(--text);">
