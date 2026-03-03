@@ -29,22 +29,14 @@ exports.getAvailability = async (req, res, next) => {
 };
 exports.createBooking = async (req, res, next) => {
   try {
-    const {
-      room,
-      professor,
-      department,
-      section,
-      time_slot,
-      date,
-      reason
-    } = req.body;
+    const data = bookingSchema.parse(req.body);
 
-    // prevent double booking ONLY if already approved
+    // ❗ only block if already fully approved
     const exists = await prisma.booking.findFirst({
       where: {
-        room_name: room,
-        date: new Date(date),
-        time_slot: time_slot,
+        room_name: data.room,
+        date: new Date(data.date),
+        time_slot: data.time_slot,
         status: "Approved"
       }
     });
@@ -55,22 +47,18 @@ exports.createBooking = async (req, res, next) => {
       });
     }
 
+    // ✅ START WORKFLOW HERE
     const booking = await prisma.booking.create({
       data: {
-        room_name: room,
-        professor,
-        department,
-        section,
-        reason,
-        date: new Date(date),
-        time_slot,
-        status: "Pending Admin" // ✅ correct workflow
+        room_name: data.room,
+        date: new Date(data.date),
+        time_slot: data.time_slot,
+        status: "Pending Admin" // ⭐ IMPORTANT
       }
     });
 
     res.status(201).json(booking);
   } catch (err) {
-    console.error("CREATE BOOKING ERROR:", err);
     next(err);
   }
 };

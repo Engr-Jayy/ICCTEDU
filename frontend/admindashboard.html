@@ -187,7 +187,12 @@
     async function updateAdminUI() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
-        const data = await res.json();
+        const raw = await res.json();
+
+        // ✅ NORMALIZE RESPONSE (VERY IMPORTANT)
+        let data = [];
+        if (Array.isArray(raw)) data = raw;
+        else if (raw.bookings) data = raw.bookings;
 
         // 🔹 counts
         document.getElementById('countPendingAdmin').innerText =
