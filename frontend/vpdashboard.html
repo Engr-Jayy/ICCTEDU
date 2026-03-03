@@ -151,36 +151,40 @@ function switchPage(page) {
 async function updateUI() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
-        const raw = await res.json();
-        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // ✅ normalize response (VERY IMPORTANT)
-        let data = [];
-        if (Array.isArray(raw)) data = raw;
-        else if (raw.bookings) data = raw.bookings;
-
-        // ===== stats =====
-        document.getElementById('statPending').innerText =
-            data.filter(i => i.status === "Pending VP").length;
-
-        document.getElementById('statApproved').innerText =
-            data.filter(i => i.status === "Approved").length;
-
-        document.getElementById('statRejected').innerText =
-            data.filter(i => (i.status || "").includes("Rejected")).length;
-
-        // ===== pending list =====
-        const vpList = document.getElementById('vpList');
-        const pendingVP = data.filter(i => i.status === "Pending VP");
-
-        if (pendingVP.length === 0) {
-            vpList.innerHTML =
-                `<div class="empty-state">
-                    <p>No requests awaiting your signature.</p>
-                 </div>`;
+        if (!res.ok) {
+            console.error("Stats fetch failed:", res.status);
             return;
         }
 
+        const data = await res.json();
+
+        // ✅ safety guard
+        const list = Array.isArray(data) ? data : [];
+
+        // 🔹 stats
+        document.getElementById('statPending').innerText =
+            list.filter(i => i.status === "Pending VP").length;
+
+        document.getElementById('statApproved').innerText =
+            list.filter(i => i.status === "Approved").length;
+
+        document.getElementById('statRejected').innerText =
+            list.filter(i => (i.status || "").includes("Rejected")).length;
+
+        const vpList = document.getElementById('vpList');
+        const pendingVP = list.filter(i => i.status === "Pending VP");
+
+        // ✅ empty state
+        if (pendingVP.length === 0) {
+            vpList.innerHTML = `
+                <div class="empty-state">
+                    <p>No requests awaiting your signature.</p>
+                </div>`;
+            return;
+        }
+
+        // ✅ render cards
         vpList.innerHTML = pendingVP.map(req => `
             <div class="request-card">
                 <div>
